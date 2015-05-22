@@ -1,0 +1,261 @@
+﻿<script>
+    var perPage = 5;
+
+    function getProducts(page) {
+        var xmlhttp;
+        if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp = new XMLHttpRequest();
+        }
+        else {// code for IE6, IE5
+            xmlhttp = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        
+        xmlhttp.onreadystatechange = function () {
+            if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+                var products = JSON.parse(xmlhttp.responseText);
+                
+                document.getElementById("products").innerHTML = "";
+                for (i = 0; i < products.length; i++)
+                {
+                    var li0 = document.createElement("li");
+                    li0.innerHTML = products[i].Name;
+                    document.getElementById("products").appendChild(li0);
+
+                    // details link
+                    var alink = document.createElement("a");
+                    alink.href = "javascript:void()";
+                    alink.id = products[i].ProductId;
+                    alink.onclick = (function (ProductId) {
+                        return function () {
+                            getDetails(ProductId);
+                        };
+                    })(products[i].ProductId);
+                    alink.innerHTML= "Details";
+                    document.getElementById("products").appendChild(alink);
+
+                    // separater
+                    var span = document.createElement("span");
+                    span.innerHTML = " | ";
+                    document.getElementById("products").appendChild(span);
+
+                    // delete link
+                    var alink = document.createElement("a");
+                    alink.href = "javascript:void()";
+                    alink.id = products[i].ProductId;
+                    alink.onclick = (function (ProductId) {
+                        return function () {
+                            deleteProduct(ProductId);
+                        };
+                    })(products[i].ProductId);
+                    alink.innerHTML = "Delete";
+                    document.getElementById("products").appendChild(alink);
+
+                    var br = document.createElement("br");
+                    document.getElementById("products").appendChild(br);
+                }
+            }
+        }
+        xmlhttp.open("GET", "http://localhost:26307/api/Products?p="+page+"&perPage="+perPage, true);
+        xmlhttp.send();
+    }
+    getProducts(0);
+
+    function getDetails(ProductId) {
+        var xmlhttp1;
+        if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp1 = new XMLHttpRequest();
+        }
+        else {// code for IE6, IE5
+            xmlhttp1 = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        
+        xmlhttp1.onreadystatechange = function () {
+            if (xmlhttp1.readyState == 4 && xmlhttp1.status == 200) {
+                if (xmlhttp1.responseText) { // the onreadystatechange executes multiple times, so this check is required
+                    var product = JSON.parse(xmlhttp1.responseText);
+                    document.getElementById("DetailsName").value = product.Name;
+                    document.getElementById("DetailsPrice").value = product.Price;
+                    document.getElementById("DetailsProductId").value = product.ProductId;
+                    document.getElementById("form2").action = document.getElementById("form2").action + "/" + product.ProductId;
+                }
+            }
+        }
+        
+        xmlhttp1.open("GET", "http://localhost:26307/api/Products/" + ProductId, true);
+        xmlhttp1.send();
+    }
+
+    function updateProduct() {
+        var product = {
+            Name: document.getElementById("DetailsName").value,
+            Price: document.getElementById("DetailsPrice").value,
+            ProductId: document.getElementById("DetailsProductId").value
+        }
+        
+        var json = JSON.stringify(product);
+        var xmlhttp2;
+        
+        if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp2 = new XMLHttpRequest();
+        } 
+        else {// code for IE6, IE5
+            xmlhttp2 = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        
+        xmlhttp2.onreadystatechange = function () {
+            if (xmlhttp2.readyState == 4 && xmlhttp2.status == 200) {
+                if (xmlhttp1.responseText) { // the onreadystatechange executes multiple times, so this check is required
+                    // handle response
+                }
+            }
+        }
+        
+        xmlhttp2.open("PUT", "http://localhost:26307/api/Products/" + product.ProductId, true);
+        xmlhttp2.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xmlhttp2.send(json);
+
+        return false;
+    }
+
+    function deleteProduct(ProductId)
+    {
+        var xmlhttp3;
+        
+        if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp3 = new XMLHttpRequest();
+        }
+        else {// code for IE6, IE5
+            xmlhttp3 = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        
+        xmlhttp3.open("DELETE", "http://localhost:26307/api/Products/" + ProductId, true);
+        xmlhttp3.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xmlhttp3.send();
+    }
+
+    function getAllProducts()
+    {
+        var xmlhttp4;
+        if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp4 = new XMLHttpRequest();
+        }
+        else {// code for IE6, IE5
+            xmlhttp4 = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+        
+        xmlhttp4.open("GET", "http://localhost:26307/api/Products", true);
+        xmlhttp4.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xmlhttp4.send();
+        
+        xmlhttp4.onreadystatechange = function () {
+            if (xmlhttp4.readyState == 4 && xmlhttp4.status == 200) {
+                if (xmlhttp4.responseText) { // the onreadystatechange executes multiple times, so this check is required
+                    var products = JSON.parse(xmlhttp4.responseText);
+                    var pages = products.length / perPage;
+
+                    for (var i = 0; i < pages; i++)
+                    {
+                        var a = document.createElement("a");
+                        a.href = "javascript:void()";
+                        a.innerHTML = i + 1;
+                        a.id = i;
+                        a.onclick = (function (i) {
+                            return function () {
+                                //deleteProduct(i);
+                                getProducts(i);
+                            };
+                        })(i);
+                        
+                        document.getElementById("paging").appendChild(a);
+                    }
+                }
+            }
+        }
+
+    }
+    getAllProducts();
+
+    function createProduct()
+    {
+        var product = {
+            Name: document.getElementById("CreateName").value,
+            Price: document.getElementById("CreatePrice").value,
+        }
+
+        var jsonProduct = JSON.stringify(product);
+
+        var xmlhttp5;
+        if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+            xmlhttp5 = new XMLHttpRequest();
+        }
+        else {// code for IE6, IE5
+            xmlhttp5 = new ActiveXObject("Microsoft.XMLHTTP");
+        }
+
+        xmlhttp5.open("POST", "http://localhost:26307/api/Products", true);
+        xmlhttp5.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+        xmlhttp5.send(jsonProduct);
+
+        xmlhttp5.onreadystatechange = function () {
+            if (xmlhttp4.readyState == 4 && xmlhttp4.status == 200) {
+                if (xmlhttp4.responseText) { // the onreadystatechange executes multiple times, so this check is required
+                    // handle the response
+                }
+            }
+        }
+        return false;
+    }
+
+</script>
+
+<div>
+    <ul id="products"></ul>
+</div>
+
+<style>
+    #paging a {
+        border: 1px solid gainsboro;
+    }
+</style>
+<div id="paging"></div>
+
+<h3>Product Details</h3>
+<form id="form2" method="post" action="/api/Products/PutProduct" onsubmit="return updateProduct()">
+    <input id="DetailsProductId" name="ProductId" type="hidden" />
+    <div id="details">
+        <div>
+            <label for="Name">Name</label>
+        </div>
+        <div>
+            <input name="Name" id="DetailsName" type="text" />
+        </div>
+        <div>
+            <label for="Price">Price</label>
+        </div>
+        <div>
+            <input name="Price" id="DetailsPrice" type="text" />
+        </div>
+        <div>
+            <input type="submit" value="Update" />
+        </div>
+    </div>
+</form>
+
+<h3>Create Product</h3>
+<form id="form1" method="post" action="/api/Products/PostProduct" onsubmit="return createProduct()">
+    <div>
+        <label for="Name">Name</label>
+    </div>
+    <div>
+        <input name="Name" id="CreateName" type="text" />
+    </div>
+    <div>
+        <label for="Price">Price</label>
+    </div>
+    <div>
+        <input name="Price" id="CreatePrice" type="text" />
+    </div>
+    <div>
+        <input type="submit" value="Create" />
+    </div>
+</form>

@@ -1,0 +1,2 @@
+c:\users\pc\documents\visual studio 2013\Projects\ProductWebApi\ProductWebApi\obj\Debug\ProductWebApi.dll
+c:\users\pc\documents\visual studio 2013\Projects\ProductWebApi\ProductWebApi\obj\Debug\ProductWebApi.pdb
